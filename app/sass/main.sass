@@ -49,12 +49,16 @@ body
 	font-family: "Roboto"
 	overflow-x: hidden
 	opacity: 1
+
+.wrapper
 	display: flex
 	justify-content: center
 	align-items: center
+	height: 100%
+	width: 100%
 
 .shops-list
-	width: 600px
+	max-width: 900px
 	&__header
 		display: flex
 		align-items: center
@@ -62,9 +66,13 @@ body
 	&__title
 		font-size: 32px
 		padding: 10px
-	&__btn
-		font-size: 30px
-		line-height: normal
-		padding: 5px 20px
-		border-radius: 4px
-		border: 1px solid black
+	.mdl-list__item
+		justify-content: space-between
+		span:nth-child(1)
+			width: 40px
+		span:nth-child(2)
+			width: 190px
+		span:nth-child(3)
+			width: 160px
+		span:nth-child(4)
+			width: 320px

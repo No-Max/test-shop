@@ -20,17 +20,17 @@ gulp.task('common-js', function() {
 	return gulp.src([
 		'app/js/common.js',
 		])
-	.pipe(concat('common.min.js'))
-	.pipe(uglify())
+	.pipe(concat('common.js'))
 	.pipe(gulp.dest('app/js'));
 });
 
 gulp.task('js', ['common-js'], function() {
 	return gulp.src([
 		'app/libs/material-design-lite/material.min.js',
-		'app/js/common.min.js'
+		'app/libs/Sortable/Sortable.min.js',
+		'app/js/common.js'
 		])
-	.pipe(concat('scripts.min.js'))
+	.pipe(concat('scripts.js'))
 	.pipe(gulp.dest('app/js'))
 	.pipe(browserSync.reload({stream: true}));
 });
@@ -45,24 +45,15 @@ gulp.task('browser-sync', function() {
 });
 
 gulp.task('sass', function() {
-	return gulp.src('app/sass/**/*.sass')
+	return gulp.src(['app/libs/material-design-lite/material.min.css', 'app/sass/**/*.sass'])
 	.pipe(sass({outputStyle: 'expand'}).on("error", notify.onError()))
 	.pipe(autoprefixer(['last 15 versions']))
 	.pipe(concat('common.css'))
 	.pipe(gulp.dest('app/css'))
-});
-
-gulp.task('css', function() {
-	return gulp.src([
-		'app/libs/material-design-lite/material.min.css',
-		'app/css/common.css'
-		])
-	.pipe(concat('common.min.css'))
-	.pipe(gulp.dest('app/css'))
 	.pipe(browserSync.reload({stream: true}));
 });
 
-gulp.task('watch', ['css', 'js', 'browser-sync'], function() {
+gulp.task('watch', ['sass', 'js', 'browser-sync'], function() {
 	gulp.watch('app/sass/**/*.sass', ['sass']);
 	gulp.watch(['app/js/common.js'], ['js']);
 	gulp.watch('app/*.html', browserSync.reload);
@@ -74,18 +65,18 @@ gulp.task('imagemin', function() {
 	.pipe(gulp.dest('dist/img')); 
 });
 
-gulp.task('build', ['removedist', 'imagemin', 'css', 'js'], function() {
+gulp.task('build', ['removedist', 'imagemin', 'sass', 'js'], function() {
 
 	var buildFiles = gulp.src([
 		'app/*.html',
 		]).pipe(gulp.dest('dist'));
 
 	var buildCss = gulp.src([
-		'app/css/common.min.css',
+		'app/css/common.css',
 		]).pipe(gulp.dest('dist/css'));
 
 	var buildJs = gulp.src([
-		'app/js/scripts.min.js',
+		'app/js/scripts.js',
 		]).pipe(gulp.dest('dist/js'));
 
 	var buildFonts = gulp.src([
