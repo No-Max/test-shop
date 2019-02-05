@@ -57,17 +57,26 @@ body
 	height: 100%
 	width: 100%
 
-.shops-list
+.shops-list,
+.products-list
 	max-width: 900px
+	display: none
+	&.active
+		display: block
 	&__header
 		display: flex
 		align-items: center
-		justify-content: space-around
+		justify-content: space-between
+		padding: 16px
 	&__title
 		font-size: 32px
 		padding: 10px
 	.mdl-list__item
 		justify-content: space-between
+		border: 1px solid transparent
+		&:hover,
+		&:active
+			border: 1px solid #ccc
 		span:nth-child(1)
 			width: 40px
 		span:nth-child(2)
@@ -76,3 +85,13 @@ body
 			width: 160px
 		span:nth-child(4)
 			width: 320px
+	.edit-shop
+		margin-left: 10px
+
+.mdl-dialog
+	width: auto
+	max-width: 600px
+.mdl-textfield
+	width: 100%
+.mdl-data-table
+	width: 100%
