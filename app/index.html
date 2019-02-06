@@ -60,7 +60,7 @@
 					</button>
 				</div>
 				<div class="products-list__title">
-					Список товаров для <b>"<span id="shopName">фывфы</span>"</b>
+					Список товаров для <b>"<span id="shopTitle"></span>"</b>
 				</div>
 				<div>
 					<button 
@@ -90,7 +90,7 @@
 				<h4 class="mdl-dialog__title">Добавить/редактировать магазин</h4>
 				<div class="mdl-dialog__content">
 					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-						<input class="mdl-textfield__input" type="text" id="shopName" required="required">
+						<input class="mdl-textfield__input" type="text" id="shopName">
 						<label class="mdl-textfield__label" for="sample3">Название</label>
 					</div>
 					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -106,7 +106,7 @@
 					<button 
 						id="addShop"
 						type="button" 
-						class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Создать</button>
+						class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Сохранить</button>
 					<button type="button" class="mdl-button close">Отмена</button>
 					<button type="reset" class="mdl-button close">Очистить</button>
 				</div>
@@ -114,28 +114,28 @@
 		</dialog>
 
 		<dialog class="mdl-dialog" id="addProductDialog">
-				<form action="#">
-					<h4 class="mdl-dialog__title">Добавить/редактировать товар</h4>
-					<div class="mdl-dialog__content">
-						<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-							<input class="mdl-textfield__input" type="text" id="productName" required="required">
-							<label class="mdl-textfield__label" for="sample3">Название</label>
-						</div>
-						<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-							<input class="mdl-textfield__input" type="text" id="productPrice" required="required">
-							<label class="mdl-textfield__label" for="sample3">Цена</label>
-						</div>
+			<form action="#">
+				<h4 class="mdl-dialog__title">Добавить/редактировать товар</h4>
+				<div class="mdl-dialog__content">
+					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+						<input class="mdl-textfield__input" type="text" id="productName" required="required">
+						<label class="mdl-textfield__label" for="sample3">Название</label>
 					</div>
-					<div class="mdl-dialog__actions">
-						<button 
-							id="addProduct"
-							type="button" 
-							class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Создать</button>
-						<button type="button" class="mdl-button close">Отмена</button>
-						<button type="reset" class="mdl-button close">Очистить</button>
+					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+						<input class="mdl-textfield__input" type="text" id="productPrice" required="required">
+						<label class="mdl-textfield__label" for="sample3">Цена</label>
 					</div>
-				</form>
-			</dialog>
+				</div>
+				<div class="mdl-dialog__actions">
+					<button 
+						id="addProduct"
+						type="button" 
+						class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Сохранить</button>
+					<button type="button" class="mdl-button close">Отмена</button>
+					<button type="reset" class="mdl-button close">Очистить</button>
+				</div>
+			</form>
+		</dialog>
 	</div>
 	<script src="js/scripts.js"></script>
 

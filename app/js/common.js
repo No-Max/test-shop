@@ -2,38 +2,6 @@ window.onload = function(){
     
     var shop = new ShopType('Все магазины');
 
-    document.getElementById('shopTypeName').innerHTML = shop.name;
-
-    
-    var addShopBtn = document.getElementById('addShop');
-    var dialog = document.getElementById('addShopDialog');
-    var showDialogButton = document.getElementById('showAddShopDialog');
-    
-    if (! dialog.showModal) {
-      dialogPolyfill.registerDialog(dialog);
-    }
-
-    showDialogButton.addEventListener('click', function() {
-      dialog.showModal();
-    });
-
-    dialog.querySelector('.close').addEventListener('click', function() {
-      dialog.close();
-    });
-
-    addShopBtn.onclick = function(e){
-        e.preventDefault();
-        shopObj = {
-            name: document.querySelector("#shopName").value, 
-            address: document.querySelector("#shopAddress").value, 
-            wHours: document.querySelector("#shopHours").value    
-        }
-        if(shopObj.name && shopObj.address && shopObj.wHours){
-            shop.addShop(shopObj);
-            dialog.close();
-        }  
-    };
-
     document.getElementById('backToShopsBtn').onclick = function(){
         pageSwitcher(document.querySelector('.shops-list'));    
     }
@@ -44,35 +12,78 @@ shopStorage = [
     { id:2, name: "Brownsugar", address: "Скрыганова 2Б", wHours: "10:00 - 19:00", number: 2 },
     { id:3, name: "BIGZZ", address: "просп. Машерова 76а", wHours: "24 часа в сутки", number: 3 }
 ];
-function findShopByID(id){
-    var result;
-    shopStorage.forEach(function(shop){
-        if(shop.id == id) result = shop;
-    });
-    return result;
-}
 
 function ShopType(name) {
-    this.name = name;
-    this.addShop = function(shop){
-        shop.id = shopStorage.length + 1;
-        shop.number = shopStorage.length + 1;
-        shopStorage.push(shop);   
-        updateShopList();   
-    }
-
+    var shopTypeName =  document.getElementById('shopTypeName');
     var container = document.querySelector('#shopsContainer');
+    var dialog = document.getElementById('addShopDialog');
+    var showDialogButton = document.getElementById('showAddShopDialog');
+    var addShopBtn = document.getElementById('addShop');
+    
+    var dialogNameField = document.querySelector("#shopName");
+    var dialogAddressField = document.querySelector("#shopAddress");
+    var dialogHoursField = document.querySelector("#shopHours");
+    
     var editBtnclassName = 'edit-shop';
     var productsBtnclassName = 'show-products';
-    
-    updateShopList();
 
+    shopTypeName.innerHTML = name;
+
+    if (!dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+    }
+    showDialogButton.addEventListener('click', function() {
+        dialog.showModal();
+    });
+    dialog.querySelector('.close').addEventListener('click', function() {
+        dialog.close();
+    });
+  
+    updateShopList();
+  
     new Sortable(shopsContainer, {
         onEnd: function(e) {
             sortShops(e.newIndex, e.oldIndex);
             updateShopList();
         }
     });
+
+    addShopBtn.onclick = function(e){
+        e.preventDefault();
+        var shopObj = {
+            name: dialogNameField.value, 
+            address: dialogAddressField.value, 
+            wHours: dialogHoursField.value    
+        }
+        if(shopObj.name && shopObj.address && shopObj.wHours){
+            if(this.value >= 0){
+                updateShop(shopObj, Number(this.value));
+            } else {
+                addShop(shopObj);
+            }
+        }  
+    };
+    
+    function addShop (shop){
+        shop.id = shopStorage.length + 1;
+        shop.number = shopStorage.length + 1;
+        shopStorage.push(shop);
+        updateShopList();           
+        dialog.close();
+    }
+    function updateShop (shop, index){
+        shopStorage[index].name = shop.name;
+        shopStorage[index].address = shop.address;
+        shopStorage[index].wHours = shop.wHours;
+        
+        dialogNameField.value = '';
+        dialogAddressField.value = ''; 
+        dialogHoursField.value = ''; 
+
+        addShopBtn.value = '';
+        updateShopList();           
+        dialog.close();
+    }
 
     function shopElement(shop){
         var item = document.createElement('div');
@@ -95,7 +106,24 @@ function ShopType(name) {
         addBtnListener(productsBtnclassName, function(index){
             new Product(shopStorage[index]);
         });
+        addBtnListener(editBtnclassName, function(index){
+            editShop(index);
+        });
     }
+
+    function editShop(index) {
+        addShopBtn.value = index;
+        var shop = shopStorage[index];
+        dialog.showModal();
+        dialogNameField.value = shop.name;
+        dialogAddressField.value = shop.address; 
+        dialogHoursField.value = shop.wHours; 
+        var event = new Event("input");
+        dialogAddressField.dispatchEvent(event);
+        dialogHoursField.dispatchEvent(event);
+        dialogNameField.dispatchEvent(event);
+    }
+
     function sortShops(currentIndex, oldIndex){
         var buffer = shopStorage[oldIndex];
         if (currentIndex < oldIndex){
@@ -136,8 +164,23 @@ function Product(shop){
     
     pageSwitcher(container.parentNode.parentNode);
 
-    document.querySelector('#shopName').innerText = shop.name;
+    document.querySelector('#shopTitle').innerText = shop.name;
     
+    var dialog = document.getElementById('addProductDialog');
+    var showDialogButton = document.getElementById('showAddProductDialog');
+    
+    if (!dialog.showModal) {
+      dialogPolyfill.registerDialog(dialog);
+    }
+
+    showDialogButton.addEventListener('click', function() {
+      dialog.showModal();
+    });
+
+    dialog.querySelector('.close').addEventListener('click', function() {
+      dialog.close();
+    });
+
     updateProductList();
 
     function updateProductList(){
@@ -148,7 +191,7 @@ function Product(shop){
             }
         });
         addBtnListener(editBtnclassName, function(index){
-                
+            dialog.showModal();
         });
     }
 
