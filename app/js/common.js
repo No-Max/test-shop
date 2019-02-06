@@ -28,7 +28,7 @@ function ShopType(name) {
     var productsBtnclassName = 'show-products';
 
     shopTypeName.innerHTML = name;
-
+    updateShopList();
     if (!dialog.showModal) {
         dialogPolyfill.registerDialog(dialog);
     }
@@ -37,9 +37,8 @@ function ShopType(name) {
     });
     dialog.querySelector('.close').addEventListener('click', function() {
         dialog.close();
+        addShopBtn.value = '';
     });
-  
-    updateShopList();
   
     new Sortable(shopsContainer, {
         onEnd: function(e) {
@@ -56,10 +55,10 @@ function ShopType(name) {
             wHours: dialogHoursField.value    
         }
         if(shopObj.name && shopObj.address && shopObj.wHours){
-            if(this.value >= 0){
-                updateShop(shopObj, Number(this.value));
-            } else {
+            if(!this.value){
                 addShop(shopObj);
+            } else {                
+                updateShop(shopObj, Number(this.value));   
             }
         }  
     };
@@ -147,41 +146,53 @@ function ShopType(name) {
     }
 }
 
-productStorage = [
+var productStorage = [
     {id: 1, number: 1, name: 'Штуки-дрюки', price: 50, shop: 1},
     {id: 2, number: 2, name: 'Штуки-базуки', price: 60, shop: 1},
-    {id: 3, number: 3, name: 'Пирог', price: 10, shop: 2},
-    {id: 4, number: 4, name: 'Кекс', price: 3, shop: 2},  
-    {id: 5, number: 5, name: 'Сахар', price: 10, shop: 3}, 
-    {id: 6, number: 6, name: 'Гречка', price: 99, shop: 3},   
+    {id: 3, number: 1, name: 'Пирог', price: 10, shop: 2},
+    {id: 4, number: 2, name: 'Кекс', price: 3, shop: 2},  
+    {id: 5, number: 1, name: 'Сахар', price: 10, shop: 3}, 
+    {id: 6, number: 2, name: 'Гречка', price: 99, shop: 3},   
 ];
 
 function Product(shop){
-    
+    var addProductBtn = document.getElementById('addProduct');
     var container = document.querySelector('#productsContainer');
-    
-    var editBtnclassName = 'edit-product';
-    
-    pageSwitcher(container.parentNode.parentNode);
-
-    document.querySelector('#shopTitle').innerText = shop.name;
-    
     var dialog = document.getElementById('addProductDialog');
     var showDialogButton = document.getElementById('showAddProductDialog');
+    var editBtnclassName = 'edit-product';
+    var dialogPriceField = document.getElementById('productPrice');
+    var dialogNameField = document.getElementById('productName');
+
+    pageSwitcher(container.parentNode.parentNode);
+    updateProductList();
+    document.querySelector('#shopTitle').innerText = shop.name;
     
     if (!dialog.showModal) {
-      dialogPolyfill.registerDialog(dialog);
+        dialogPolyfill.registerDialog(dialog);
     }
-
     showDialogButton.addEventListener('click', function() {
-      dialog.showModal();
+        dialog.showModal();
     });
-
     dialog.querySelector('.close').addEventListener('click', function() {
-      dialog.close();
+        dialog.close();
+        addProductBtn.value = '';
     });
 
-    updateProductList();
+    addProductBtn.onclick = function(e){
+        e.preventDefault();
+        var prodObj = {
+            name: dialogNameField.value, 
+            price: dialogPriceField.value 
+        }
+        if(prodObj.name && prodObj.price){
+            if(!this.value){  
+                addProduct(prodObj);
+            }else{
+                updateProduct(prodObj, this.value)
+            }    
+        }  
+    };
 
     function updateProductList(){
         container.innerHTML = '';
@@ -190,9 +201,43 @@ function Product(shop){
                 container.append(productElement(product));
             }
         });
-        addBtnListener(editBtnclassName, function(index){
-            dialog.showModal();
+        addBtnListener(editBtnclassName, function(index, id){
+            editProduct(id);
         });
+    }
+
+    function editProduct(id) {
+        addProductBtn.value = id;
+        var index = getIndexById(id);
+        dialogNameField.value = productStorage[index].name ;
+        dialogPriceField.value = productStorage[index].price;
+
+        dialog.showModal();        
+        var event = new Event("input");
+        dialogPriceField.dispatchEvent(event);
+        dialogNameField.dispatchEvent(event);
+    }
+
+    function updateProduct(productObj, id){
+        var index = getIndexById(id);
+        productStorage[index].name = productObj.name;
+        productStorage[index].price = productObj.price;
+        dialogNameField.value = '';
+        dialogPriceField.value = '';
+
+        addProductBtn.value = '';
+        updateProductList();           
+        dialog.close();
+    }
+
+    function addProduct(productObj){
+        productObj.id = productStorage.length + 1;
+        productObj.number = getNewNumber();
+        productObj.shop = shop.id;
+        productStorage.push(productObj);
+
+        updateProductList();           
+        dialog.close();
     }
 
     function productElement(product){
@@ -201,9 +246,27 @@ function Product(shop){
             '<td>' + product.number + '</td>'+
             '<td>' + product.name + '</td>'+
             '<td>$' + product.price + '</td>'+
-            '<td><button class="' + editBtnclassName + ' mdl-button mdl-js-button mdl-button--raised mdl-button--accent"><i class="material-icons">edit</i></button></td>';
+            '<td><button value="' + product.id + '" class="' + editBtnclassName + ' mdl-button mdl-js-button mdl-button--raised mdl-button--accent"><i class="material-icons">edit</i></button></td>';
         return item;
     };
+    function getIndexById(id){
+        var index;
+        for(var i = 0; i < productStorage.length; i++){
+            if(productStorage[i].id == id){
+                index = i;
+            }
+        };
+        return index;
+    }
+    function getNewNumber(){
+        var id = 0;
+        for(var i = 0; i < productStorage.length; i++){
+            if(productStorage[i].shop == shop.id){
+                id++;
+            }
+        };
+        return id+1;
+    }
 }
 
 
@@ -216,8 +279,8 @@ function addBtnListener(btnclassName, cb){
     var editBtns = document.getElementsByClassName(btnclassName); 
     for(var i = 0; i < editBtns.length; i++){
         (function(index) { 
-            editBtns[i].onclick = function(e){
-                cb(index, event);
+            editBtns[i].onclick = function(){
+                cb(index, this.value);
             };
         })(i);     
     }
@@ -230,3 +293,48 @@ function pageSwitcher(page){
     }
     page.classList.add('active');
 }
+
+
+ymaps.ready( function () {
+    var myMap = new ymaps.Map("map", {
+        center: [53.802257, 27.661831], //Minsk
+        zoom: 10 
+    }, {
+        balloonMaxWidth: 300,
+        searchControlProvider: 'yandex#search'
+    });
+    /*
+    document.querySelector('.map-info a').onclick = function (event) {
+        event.preventDefault();
+        var id  = "#"+$(this).attr('data');
+        var coords = $(this).attr('coords').split(','); 
+
+        var address = $(id+" .mark-address").html();
+        if(!address){address=""};
+        var phone = $(id+" .mark-phone").html();
+        if(!phone){phone=""};
+        var tit = $(id+" .mark-tit").html();
+        if(!tit){tit=""}; 
+        var time = $(id+" .mark-time").html();
+        if(!time){time=""};
+
+        if($(this).attr('data')){
+            myMap.balloon.open(coords, {
+                contentHeader:tit,
+                contentBody:address+"<br>"+phone,
+                contentFooter:'<sup>'+time+'</sup>'
+            });
+        }    
+    };
+    */
+
+    for(var i = 0; i < shopStorage.length; i++){
+        var cor = [53.802257, 27.661831];
+        var cont = '<b>' + shopStorage[i].name + '</b>' + '<br>' + shopStorage[i].wHours;
+        myMap.geoObjects.add(new ymaps.Placemark(cor, {
+            balloonContent: cont
+        }, {
+            preset: 'twirl#violetIcon'
+        }));
+    }     
+  });
