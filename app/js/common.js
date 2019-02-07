@@ -1,19 +1,30 @@
 window.onload = function(){
-    
-    var shop = new ShopType('Все магазины');
-
-    document.getElementById('backToShopsBtn').onclick = function(){
-        pageSwitcher(document.querySelector('.shops-list'));    
-    }
+    var shopStorage = [
+        { id:1, name: "Sex shop", address: "Дзержинского, д. 11", wHours: "10:00 - 22:00", number: 1, coords: [53.844546, 27.550548], products: [
+            {id: 1, number: 1, name: 'Штуки-дрюки', price: 50, shop: 1},
+            {id: 2, number: 2, name: 'Штуки-базуки', price: 60, shop: 1},   
+        ]},
+        { id:2, name: "Brownsugar", address: "Скрыганова 2Б", wHours: "10:00 - 19:00", number: 2, coords: [53.951456, 27.494942], products: [
+            {id: 3, number: 1, name: 'Пирог', price: 10, shop: 2},
+            {id: 4, number: 2, name: 'Кекс', price: 3, shop: 2}
+        ]},
+        { id:3, name: "BIGZZ", address: "просп. Машерова 76а", wHours: "24 часа в сутки", number: 3, coords: [53.914627, 27.658311], products: [
+            {id: 5, number: 1, name: 'Сахар', price: 10, shop: 3}, 
+            {id: 6, number: 2, name: 'Гречка', price: 99, shop: 3}
+        ] }
+    ];
+    ymaps.ready(function () {  
+        shopsList('Все магазины', shopStorage, new ymaps.Map("map", {
+            center: [53.802257, 27.661831], //Minsk
+            zoom: 10 
+        }, {
+            balloonMaxWidth: 300,
+            searchControlProvider: 'yandex#search'
+        }));
+    });
 }
 
-shopStorage = [
-    { id:1, name: "Sex shop", address: "Дзержинского, д. 11", wHours: "10:00 - 22:00", number: 1 },
-    { id:2, name: "Brownsugar", address: "Скрыганова 2Б", wHours: "10:00 - 19:00", number: 2 },
-    { id:3, name: "BIGZZ", address: "просп. Машерова 76а", wHours: "24 часа в сутки", number: 3 }
-];
-
-function ShopType(name) {
+function shopsList(name, shopStorage, map) {
     var shopTypeName =  document.getElementById('shopTypeName');
     var container = document.querySelector('#shopsContainer');
     var dialog = document.getElementById('addShopDialog');
@@ -28,7 +39,11 @@ function ShopType(name) {
     var productsBtnclassName = 'show-products';
 
     shopTypeName.innerHTML = name;
-    updateShopList();
+    updateShopList(); 
+    document.addEventListener('backToShopPage', function (e) {
+        updateShopList();        
+    }, false);
+    
     if (!dialog.showModal) {
         dialogPolyfill.registerDialog(dialog);
     }
@@ -70,6 +85,7 @@ function ShopType(name) {
         updateShopList();           
         dialog.close();
     }
+
     function updateShop (shop, index){
         shopStorage[index].name = shop.name;
         shopStorage[index].address = shop.address;
@@ -84,32 +100,6 @@ function ShopType(name) {
         dialog.close();
     }
 
-    function shopElement(shop){
-        var item = document.createElement('div');
-            item.classList.add('mdl-list__item');
-            item.innerHTML =
-                '<span>' + shop.number + '.</span>'+
-                '<span>'+ shop.name +'</span>'+                  
-                '<span>' + shop.wHours + '</span>'+
-                '<span>' + shop.address + '</span>'+
-                '<span><button class="' + productsBtnclassName + ' mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Товары</button></span>'+
-                '<button class="' + editBtnclassName + ' mdl-button mdl-js-button mdl-button--raised mdl-button--accent"><i class="material-icons">edit</i></button>';
-        return item;
-    };
-
-    function updateShopList(){
-        container.innerHTML = '';
-        shopStorage.forEach(function(shop) {
-            container.append(shopElement(shop));
-        });
-        addBtnListener(productsBtnclassName, function(index){
-            new Product(shopStorage[index]);
-        });
-        addBtnListener(editBtnclassName, function(index){
-            editShop(index);
-        });
-    }
-
     function editShop(index) {
         addShopBtn.value = index;
         var shop = shopStorage[index];
@@ -122,6 +112,42 @@ function ShopType(name) {
         dialogHoursField.dispatchEvent(event);
         dialogNameField.dispatchEvent(event);
     }
+
+    function updateShopList(){
+        container.innerHTML = '';
+        shopStorage.forEach(function(shop) {
+            container.append(shopElement(shop));
+        });
+        addBtnListener(productsBtnclassName, function(index){
+            productsList(shopStorage[index], map);
+        });
+        addBtnListener(editBtnclassName, function(index){
+            editShop(index);
+        });
+        map.geoObjects.removeAll();
+        for(var i = 0; i < shopStorage.length; i++){
+            var cor = shopStorage[i].coords;
+            var cont = '<b>' + shopStorage[i].name + '</b>' + '<br>' + shopStorage[i].wHours;
+            map.geoObjects.add(new ymaps.Placemark(cor, {
+                balloonContent: cont
+            }, {
+                preset: 'twirl#violetIcon'
+            }));
+        }
+    }
+
+    function shopElement(shop){
+        var item = document.createElement('div');
+            item.classList.add('mdl-list__item');
+            item.innerHTML =
+                '<span>' + shop.number + '.</span>'+
+                '<span>'+ shop.name +'</span>'+                  
+                '<span>' + shop.wHours + '</span>'+
+                '<span>' + shop.address + '</span>'+
+                '<span><button class="' + productsBtnclassName + ' mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Товары</button></span>'+
+                '<button class="' + editBtnclassName + ' mdl-button mdl-js-button mdl-button--raised mdl-button--accent"><i class="material-icons">edit</i></button>';
+        return item;
+    };
 
     function sortShops(currentIndex, oldIndex){
         var buffer = shopStorage[oldIndex];
@@ -155,7 +181,7 @@ var productStorage = [
     {id: 6, number: 2, name: 'Гречка', price: 99, shop: 3},   
 ];
 
-function Product(shop){
+function productsList(shop, map){
     var addProductBtn = document.getElementById('addProduct');
     var container = document.querySelector('#productsContainer');
     var dialog = document.getElementById('addProductDialog');
@@ -163,7 +189,9 @@ function Product(shop){
     var editBtnclassName = 'edit-product';
     var dialogPriceField = document.getElementById('productPrice');
     var dialogNameField = document.getElementById('productName');
-
+    var backToShopsBtn = document.getElementById('backToShopsBtn');
+    var productListPage = document.querySelector('.shops-list')
+    var productStorage = shop.products;
     pageSwitcher(container.parentNode.parentNode);
     updateProductList();
     document.querySelector('#shopTitle').innerText = shop.name;
@@ -179,6 +207,14 @@ function Product(shop){
         addProductBtn.value = '';
     });
 
+    map.geoObjects.removeAll();
+    var cont = '<b>' + shop.name + '</b>' + '<br>' + shop.wHours;
+    map.geoObjects.add(new ymaps.Placemark(shop.coords, {
+        balloonContent: cont
+    }, {
+        preset: 'twirl#violetIcon'
+    }));
+
     addProductBtn.onclick = function(e){
         e.preventDefault();
         var prodObj = {
@@ -193,6 +229,11 @@ function Product(shop){
             }    
         }  
     };
+    backToShopsBtn.onclick = function(){
+        pageSwitcher(productListPage);
+        var event = new Event('backToShopPage');
+        document.dispatchEvent(event);    
+    }
 
     function updateProductList(){
         container.innerHTML = '';
@@ -269,11 +310,17 @@ function Product(shop){
     }
 }
 
-
-
-
-
-
+function Shop(shop){    
+    this.id = new Date().getTime();
+    this.name = shop.name;
+    this.address = shop.address;
+    this.wHours = shop.wHours;
+    this.number = shop.number;
+    this.products = [];
+    this.addProduct = function(product){
+        this.products.push(product);
+    };
+}
 
 function addBtnListener(btnclassName, cb){
     var editBtns = document.getElementsByClassName(btnclassName); 
@@ -293,48 +340,3 @@ function pageSwitcher(page){
     }
     page.classList.add('active');
 }
-
-
-ymaps.ready( function () {
-    var myMap = new ymaps.Map("map", {
-        center: [53.802257, 27.661831], //Minsk
-        zoom: 10 
-    }, {
-        balloonMaxWidth: 300,
-        searchControlProvider: 'yandex#search'
-    });
-    /*
-    document.querySelector('.map-info a').onclick = function (event) {
-        event.preventDefault();
-        var id  = "#"+$(this).attr('data');
-        var coords = $(this).attr('coords').split(','); 
-
-        var address = $(id+" .mark-address").html();
-        if(!address){address=""};
-        var phone = $(id+" .mark-phone").html();
-        if(!phone){phone=""};
-        var tit = $(id+" .mark-tit").html();
-        if(!tit){tit=""}; 
-        var time = $(id+" .mark-time").html();
-        if(!time){time=""};
-
-        if($(this).attr('data')){
-            myMap.balloon.open(coords, {
-                contentHeader:tit,
-                contentBody:address+"<br>"+phone,
-                contentFooter:'<sup>'+time+'</sup>'
-            });
-        }    
-    };
-    */
-
-    for(var i = 0; i < shopStorage.length; i++){
-        var cor = [53.802257, 27.661831];
-        var cont = '<b>' + shopStorage[i].name + '</b>' + '<br>' + shopStorage[i].wHours;
-        myMap.geoObjects.add(new ymaps.Placemark(cor, {
-            balloonContent: cont
-        }, {
-            preset: 'twirl#violetIcon'
-        }));
-    }     
-  });
